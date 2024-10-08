@@ -60,6 +60,16 @@ def four_way_elo(player_a_rating: int, player_b_rating: int, player_c_rating: in
 
     return tuple([rating for rating, _ in new_ratings])
     
+@dataclass
+class Player:
+    name: str
+    elo_rating: str
+    favorite_commander: str
+    most_played_deck: str
+    owned_decks: list[str]
+
+    def update_rating(self, new_rating: int):
+        self.elo_rating = new_rating
 
 @dataclass
 class MtgDeck:
@@ -67,7 +77,7 @@ class MtgDeck:
     commander: list[str]
     decklist: list[str]
     elo_rating: int
-    owner: str
+    owner: Player
 
     def update_rating(self, new_rating: int):
         self.elo_rating = new_rating
@@ -98,7 +108,8 @@ class DB:
             commander TEXT,
             decklist TEXT,
             elo_rating INTEGER,
-            owner TEXT
+            owner INTEGER,
+            FOREIGN KEY(owner) REFERENCES players(id)
         );
         """
 
@@ -110,7 +121,19 @@ class DB:
             result INTEGER
         );
         """
+
+        players_cmd = """
+        CREATE TABLE if not exists players (
+            id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+            name TEXT,
+            elo_rating INTEGER,
+            owned_decks TEXT,
+            favorite_commander TEXT,
+            most_played_deck TEXT
+        );
+        """
     
+        self.cursor.execute(players_cmd)
         self.cursor.execute(decks_cmd)
         self.cursor.execute(matches_cmd)
         self.conn.commit()
@@ -122,6 +145,15 @@ class DB:
         """
 
         self.cursor.execute(cmd, (deck.name, ";".join(deck.commander), ";".join(deck.decklist), deck.elo_rating, deck.owner))
+        self.conn.commit()
+
+    def add_or_update_player(self, player: Player):
+        cmd = """
+        INSERT OR REPLACE INTO decks (name, elo_rating, owned_decks, favorite_commander, most_played_deck)
+        VALUES (?, ?, ?, ?, ?);
+        """
+
+        self.cursor.execute(cmd, (player.name, player.elo_rating, player.owned_decks, player.favorite_commander, player.most_played_deck))
         self.conn.commit()
     
     def add_match(self, match: MtgMatch):
@@ -217,8 +249,12 @@ async def live_match_site():
 @app.post("/add_deck")
 async def add_deck(deck: MtgDeck):
     db.add_or_update_deck(deck)
-    return JSONResponse(content={"message": "Deck added successfully.", "success": True})
+    return JSONResponse(content={"message": "Deck added/updated successfully.", "success": True})
 
+@app.post("/add_player")
+async def add_player(player: Player):
+    db.add_or_update_player(player)
+    return JSONResponse(content={"message": "Player added/updated successfully.", "success": True})
 
 
 @app.get("/get_deck")
