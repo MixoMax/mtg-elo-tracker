@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mtg-elo-tracker</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        #deck-input {
+            margin: 0 auto;
+            width: 50%;
+        }
+
+        #deck-name-input, #commander-input, #deck-list-input, #owner-input {
+            width: 100%;
+            margin-bottom: 10px;
+            resize: vertical;
+        }
+
+        #add-deck-button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #response {
+            margin: 0 auto;
+            width: 50%;
+            text-align: center;
+        }
+
+    </style>
+
+    <script>
+        function submit_deck() {
+            let deck_name = document.getElementById("deck-name-input").value;
+            let commander = document.getElementById("commander-input").value;
+            let deck_list = document.getElementById("deck-list-input").value;
+            let owner = document.getElementById("owner-input").value;
+
+            //schema:
+            /*
+
+            {
+                "name": "string",
+                "commander": [
+                    "string"
+                ],
+                "decklist": [
+                    "string"
+                ],
+                "elo_rating": 0,
+                "owner": "string"
+            }
+            */
+
+            let deck = {
+                "name": deck_name,
+                "commander": commander.split("\n"),
+                "decklist": deck_list.split("\n"),
+                "elo_rating": 1200,
+                "owner": owner
+            }
+
+            // POST to /add_deck
+            fetch("/add_deck", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(deck)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.success) {
+                    document.getElementById("response").innerHTML = "Deck added successfully!";
+                } else {
+                    document.getElementById("response").innerHTML = "Error adding deck!";
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+    </script>
+
+</head>
+<body>
+    <div class="hbox" id="header">
+        <h1>mtg-elo-tracker</h1>
+        <a href="index.html">Home</a>
+        <a href="live_match.html">Live Match</a>
+        <a href="add_deck.html">Add Deck</a>
+    </div>
+
+    path: sites/add_deck.html
+
+    <div class="vbox" id="deck-input">
+        <h2>Add Deck</h2>
+        <textarea id="deck-name-input" placeholder="Deck Name" rows="1" cols="50"></textarea>
+        <textarea id="commander-input" placeholder="Commander(s)" rows="2" cols="50"></textarea>
+        <textarea id="deck-list-input" placeholder="Decklist" rows="30" cols="50"></textarea>
+        <textarea id="owner-input" placeholder="Owner" rows="1" cols="50"></textarea>
+
+        <button id="add-deck-button" onclick="submit_deck()">Add Deck</button>
+    </div>
+
+    <div id="response">
+    </div>
+
+
+</body>
+</html>

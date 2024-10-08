@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mtg-elo-tracker</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <script>
+
+        function get_deck_names() {
+            fetch("/get_all_decks_names")
+            .then(response => response.json())
+            .then(data => {
+                
+                let deck_selects = document.getElementsByClassName("deck-select");
+                for (let i = 0; i < deck_selects.length; i++) {
+                    let deck_select = deck_selects[i];
+                    for (let j = 0; j < data.length; j++) {
+                        let deck_name = data[j];
+                        let option = document.createElement("option");
+                        option.text = deck_name;
+                        option.value = deck_name.split(" - ")[0];
+                        deck_select.add(option);
+                    }
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            get_deck_names();
+        });
+
+    </script>
+
+</head>
+<body>
+    <div class="hbox" id="header">
+        <h1>mtg-elo-tracker</h1>
+        <a href="index.html">Home</a>
+        <a href="live_match.html">Live Match</a>
+        <a href="add_deck.html">Add Deck</a>
+    </div>
+
+    <select class="deck-select" onchange="document.getElementById('deck_name_1').innerText = this.value"></select>
+    <p id="deck_name_1"></p>
+    
+</body>
+</html>
