@@ -191,7 +191,7 @@ class DB:
 
 
 app = FastAPI()
-db = DB("mtg_decks.db")
+db = DB("./data/mtg_decks.db")
 db.create_tables()
 
 @app.get("/")
