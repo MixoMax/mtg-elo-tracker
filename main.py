@@ -226,6 +226,8 @@ app = FastAPI()
 db = DB("./data/mtg_decks.db")
 db.create_tables()
 
+
+
 @app.get("/")
 async def root():
     return FileResponse("./sites/index.html")
@@ -245,6 +247,15 @@ async def add_deck_site():
 @app.get("/live_match.html")
 async def live_match_site():
     return FileResponse("./sites/live_match.html")
+
+@app.get("/add_player.html")
+async def add_player_site():
+    return FileResponse("./sites/add_player.html")
+
+@app.get("/view_stats.html")
+async def view_stats_site():
+    return FileResponse("./sites/view_stats.html")
+
 
 @app.post("/add_deck")
 async def add_deck(deck: MtgDeck):
