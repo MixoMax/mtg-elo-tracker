@@ -63,7 +63,7 @@ def four_way_elo(player_a_rating: int, player_b_rating: int, player_c_rating: in
 @dataclass
 class Player:
     name: str
-    elo_rating: str
+    elo_rating: int
     favorite_commander: str
     most_played_deck: str
     owned_decks: list[str]
@@ -77,7 +77,7 @@ class MtgDeck:
     commander: list[str]
     decklist: list[str]
     elo_rating: int
-    owner: Player
+    owner_id: int
 
     def update_rating(self, new_rating: int):
         self.elo_rating = new_rating
@@ -144,16 +144,16 @@ class DB:
         VALUES (?, ?, ?, ?, ?);
         """
 
-        self.cursor.execute(cmd, (deck.name, ";".join(deck.commander), ";".join(deck.decklist), deck.elo_rating, deck.owner))
+        self.cursor.execute(cmd, (deck.name, ";".join(deck.commander), ";".join(deck.decklist), deck.elo_rating, deck.owner_id))
         self.conn.commit()
 
     def add_or_update_player(self, player: Player):
         cmd = """
-        INSERT OR REPLACE INTO decks (name, elo_rating, owned_decks, favorite_commander, most_played_deck)
+        INSERT OR REPLACE INTO players (name, elo_rating, owned_decks, favorite_commander, most_played_deck)
         VALUES (?, ?, ?, ?, ?);
         """
 
-        self.cursor.execute(cmd, (player.name, player.elo_rating, player.owned_decks, player.favorite_commander, player.most_played_deck))
+        self.cursor.execute(cmd, (player.name, player.elo_rating, ";".join(player.owned_decks), player.favorite_commander, player.most_played_deck))
         self.conn.commit()
     
     def add_match(self, match: MtgMatch):
@@ -287,7 +287,7 @@ async def get_all_decks_names():
     decks = db.get_all_decks()
     deck_names = []
     for deck in decks:
-        deck_name = deck.name + " - " + deck.commander[0] + " (" + deck.owner + ")"
+        deck_name = deck.name + " - " + deck.commander[0] + " (" + str(deck.owner_id) + ")"
         deck_names.append(deck_name)
     
     return JSONResponse(content=deck_names)
