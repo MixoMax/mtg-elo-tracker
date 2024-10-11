@@ -89,6 +89,39 @@ class MtgMatch:
     decks: list[MtgDeck]
     result: FourWayMatchResult
 
+@dataclass
+class LifeAndCounters():
+    ko = bool
+    life = int
+    commander_damage = dict[str, int]
+    poison = int
+    energy = int
+    rad = int
+    acorn = int
+    experience = int
+    ticket = int
+
+    def create_new(self):
+        self.ko = False
+        self.life = 40
+        self.commander_damage = {}
+        self.poison = 0
+        self.energy = 0
+        self.rad = 0
+        self.acorn = 0
+        self.experience = 0
+        self.ticket = 0
+        
+        return self
+
+@dataclass
+class MatchPlayer(Player):
+    lifeAndCounters = LifeAndCounters
+    deck = MtgDeck
+
+    def __init__(self, deck: MtgDeck):
+        self.lifeAndCounters = LifeAndCounters().create_new()
+        self.deck = deck
 
 
 class DB:
