@@ -15,3 +15,4 @@ All-in-one mtg game tracker app:
     - [ ] connect the lifetracker to the rating
 - [ ] build the stats / visualization page
 - [ ] at the end: import all the decks
+- [ ] Archidekt import for adding decks
