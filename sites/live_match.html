@@ -33,6 +33,35 @@
 
     </script>
 
+    <style>
+        .grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+            margin: 10px;
+        }
+
+        .player-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .life-button {
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            margin: 10px;
+        }
+
+        .player-life {
+            font-size: 48px;
+            color: #666;
+        }
+    </style>
+
 </head>
 <body>
 
@@ -45,8 +74,54 @@
         <a href="view_stats.html">View Stats</a>
     </div>
 
-    <select class="deck-select" onchange="document.getElementById('deck_name_1').innerText = this.value"></select>
-    <p id="deck_name_1"></p>
+    <div class = "grid-2x2">
+        <div class="player-container">
+            <h2>Player 1</h2>
+            <select class="deck-select" id="player1-deck"></select>
+            
+            <div class = "vbox">
+                <button class="life-button" onclick="document.getElementById('player-1-life').innerText = parseInt(document.getElementById('player-1-life').innerText) + 1">+</button>
+                <p class="player-life" id = "player-1-life">40</p>
+                <button class="life-button" onclick="document.getElementById('player-1-life').innerText = parseInt(document.getElementById('player-1-life').innerText) - 1">-</button>
+            </div>
+        </div>
+
+        <div class="player-container">
+            <h2>Player 2</h2>
+            <select class="deck-select" id="player2-deck"></select>
+            
+            <div class = "vbox">
+                <button class="life-button" onclick="document.getElementById('player-2-life').innerText = parseInt(document.getElementById('player-2-life').innerText) + 1">+</button>
+                <p class="player-life" id = "player-2-life">40</p>
+                <button class="life-button" onclick="document.getElementById('player-2-life').innerText = parseInt(document.getElementById('player-2-life').innerText) - 1">-</button>
+            </div>
+        </div>
+
+        <div class = "player-container">
+            <h3>Player 3</h3>
+            <select class="deck-select" id="player3-deck"></select>
+
+            <div class = "vbox">
+                <button class="life-button" onclick="document.getElementById('player-3-life').innerText = parseInt(document.getElementById('player-3-life').innerText) + 1">+</button>
+                <p class="player-life" id = "player-3-life">40</p>
+                <button class="life-button" onclick="document.getElementById('player-3-life').innerText = parseInt(document.getElementById('player-3-life').innerText) - 1">-</button>
+            </div>
+        </div>
+
+        <div class = "player-container">
+            <h3>Player 4</h3>
+            <select class="deck-select" id="player4-deck"></select>
+
+            <div class = "vbox">
+                <button class="life-button" onclick="document.getElementById('player-4-life').innerText = parseInt(document.getElementById('player-4-life').innerText) + 1">+</button>
+                <p class="player-life" id = "player-4-life">40</p>
+                <button class="life-button" onclick="document.getElementById('player-4-life').innerText = parseInt(document.getElementById('player-4-life').innerText) - 1">-</button>
+            </div>
+        </div>
+        
+
+
+    </div>
     
 </body>
 </html>
