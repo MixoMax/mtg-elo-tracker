@@ -1,6 +1,8 @@
 from enum import Enum
 from dataclasses import dataclass
 import sqlite3
+import json
+import requests
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.requests import Request
@@ -249,6 +251,22 @@ class DB:
             result[3] = FourWayMatchResult(result[3])
             matches_out.append(MtgMatch(*result))
 
+    def get_owner_id(self, owner_name: str) -> int:
+        cmd = """
+        SELECT id FROM players WHERE name = ?;
+        """
+
+        self.cursor.execute(cmd, (owner_name,))
+        result = self.cursor.fetchone()
+
+        if result is None:
+            return None
+        
+        return result[0]
+    
+    def player_exists(self, player_name: str) -> bool:
+        return self.get_owner_id(player_name) is not None
+
 
     def close(self):
         self.conn.close()
@@ -290,10 +308,67 @@ async def view_stats_site():
     return FileResponse("./sites/view_stats.html")
 
 
+
 @app.post("/add_deck")
 async def add_deck(deck: MtgDeck):
     db.add_or_update_deck(deck)
     return JSONResponse(content={"message": "Deck added/updated successfully.", "success": True})
+
+@app.get("/api/add_deck_from_archidekt")
+async def add_deck_from_archidekt(archidekt_url: str):
+    response = requests.get(archidekt_url)
+    deck_text = response.text
+
+    deck_json_raw = deck_text.split('{"deck":')[1]
+
+    num_curly_braces = 0
+    deck_json = ""
+    for char in deck_json_raw:
+        if char == "{":
+            num_curly_braces += 1
+        elif char == "}":
+            num_curly_braces -= 1
+        if num_curly_braces > 0:
+            deck_json += char
+        else:
+            break
+    
+    deck_json += "}"
+
+    deck_json = json.loads(deck_json)
+
+    deck_name = deck_json["name"]
+    owner_name = deck_json["owner"]
+
+    decklist_json = deck_json["cardMap"]
+
+    commanders = []
+    decklist = []
+
+    for key, value in decklist_json.items():
+        card_name = value["name"]
+        if "Commander" in value["categories"]:
+            commanders.append(card_name)
+        else:
+            decklist.append(card_name)
+    
+    deck = MtgDeck(deck_name, commanders, decklist, 1200, 0)
+    
+    # if owner is already in db, set owner_id to that id
+    # if owner is not in db, add owner to db and set owner_id to that id
+
+    if db.player_exists(owner_name):
+        deck.owner_id = db.get_owner_id(owner_name)
+    else:
+        owner = Player(owner_name, 1200, "", "", [])
+        db.add_or_update_player(owner)
+        deck.owner_id = db.get_owner_id(owner_name)
+    
+    db.add_or_update_deck(deck)
+
+    return JSONResponse(content={"message": "Deck added/updated successfully.", "success": True})
+
+
 
 @app.post("/add_player")
 async def add_player(player: Player):
